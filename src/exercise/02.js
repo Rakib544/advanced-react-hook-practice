@@ -10,19 +10,15 @@ import {
   PokemonInfoFallback,
 } from '../pokemon'
 
-// 🐨 this is going to be our generic asyncReducer
 function asyncReducer(state, action) {
   switch (action.type) {
     case 'pending': {
-      // 🐨 replace "pokemon" with "data"
       return {status: 'pending', data: null, error: null}
     }
     case 'resolved': {
-      // 🐨 replace "pokemon" with "data" (in the action too!)
       return {status: 'resolved', data: action.data, error: null}
     }
     case 'rejected': {
-      // 🐨 replace "pokemon" with "data"
       return {status: 'rejected', data: null, error: action.error}
     }
     default: {
@@ -61,7 +57,6 @@ function useAsync(asyncCallback, initialState, dependencies) {
 }
 
 function PokemonInfo({pokemonName}) {
-  // 🐨 here's how you'll use the new useAsync hook you're writing:
   const state = useAsync(
     () => {
       if (!pokemonName) {
@@ -72,7 +67,7 @@ function PokemonInfo({pokemonName}) {
     {status: pokemonName ? 'pending' : 'idle'},
     [pokemonName],
   )
-  // 🐨 this will change from "pokemon" to "data"
+
   const {data: pokemon, status, error} = state
 
   switch (status) {
