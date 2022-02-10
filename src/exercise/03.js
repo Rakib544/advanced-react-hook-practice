@@ -3,7 +3,11 @@
 
 import * as React from 'react'
 
-// 🐨 create your CountContext here with React.createContext
+const CountContext = React.createContext()
+
+function CountProvider(props) {
+  return <CountContext.Provider {...props} />
+}
 
 // 🐨 create a CountProvider component here that does this:
 //   🐨 get the count state and setCount updater with React.useState
@@ -27,11 +31,10 @@ function Counter() {
 function App() {
   return (
     <div>
-      {/*
-        🐨 wrap these two components in the CountProvider so they can access
-        the CountContext value
-      */}
-      <CountDisplay />
+      <CountProvider>
+        <CountDisplay />
+      </CountProvider>
+
       <Counter />
     </div>
   )
