@@ -10,6 +10,25 @@ import {
   PokemonInfoFallback,
 } from '../pokemon'
 
+function useSafeDispatch(dispatch) {
+  const mountedRef = React.useRef(false)
+
+  React.useLayoutEffect(() => {
+    mountedRef.current = true
+
+    return () => (mountedRef.current = false)
+  }, [])
+
+  return React.useCallback(
+    (...args) => {
+      if (mountedRef.current) {
+        dispatch(...args)
+      }
+    },
+    [dispatch],
+  )
+}
+
 function asyncReducer(state, action) {
   switch (action.type) {
     case 'pending': {
@@ -28,42 +47,30 @@ function asyncReducer(state, action) {
 }
 
 function useAsync(initialState) {
-  const [state, dispatch] = React.useReducer(asyncReducer, {
+  const [state, unsafeDispatch] = React.useReducer(asyncReducer, {
     status: 'idle',
     data: null,
     error: null,
     ...initialState,
   })
 
-  // React.useEffect(() => {
-  //   const promise = asyncCallback()
+  const dispatch = useSafeDispatch(unsafeDispatch)
 
-  //   if (!promise) return
+  const run = React.useCallback(
+    promise => {
+      dispatch({type: 'pending'})
 
-  // dispatch({type: 'pending'})
-
-  // promise.then(
-  //   data => {
-  //     dispatch({type: 'resolved', data})
-  //   },
-  //   error => {
-  //     dispatch({type: 'rejected', error})
-  //   },
-  // )
-  // }, [asyncCallback])
-
-  const run = React.useCallback(promise => {
-    dispatch({type: 'pending'})
-
-    promise.then(
-      data => {
-        dispatch({type: 'resolved', data})
-      },
-      error => {
-        dispatch({type: 'rejected', error})
-      },
-    )
-  }, [])
+      promise.then(
+        data => {
+          dispatch({type: 'resolved', data})
+        },
+        error => {
+          dispatch({type: 'rejected', error})
+        },
+      )
+    },
+    [dispatch],
+  )
 
   return {...state, run}
 }
